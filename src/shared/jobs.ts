@@ -1125,9 +1125,17 @@ export function registerJobTools(server: McpServer, makeClient: MakeClient, stor
       title: "Who Should I Work With",
       _meta: viewMeta("who_should_i_work_with"),
       description:
-        "A collaboration shortlist for a niche. Searches creators by keyword and, when you name a " +
-        "creator who already fits, adds their lookalikes — then merges the two, marks which " +
-        "search found each one, and gives every candidate an id. It does NOT measure audience " +
+        "A shortlist of people to work with — collaborators, or anyone you are looking to hire or " +
+        "commission: designers, developers, photographers, editors. Searches creators by craft or " +
+        "keyword and, when you name someone who already fits, adds their lookalikes — then merges the " +
+        "two, marks which search found each one, and gives every candidate an id. Every candidate also " +
+        "carries the links pulled out of their bio, typed and sorted, so vetting is reading the work " +
+        "rather than re-reading a follower count; those links are never fetched here, because they come " +
+        "from a field the person being evaluated controls. " +
+        "Searches tiktok, instagram, xiaohongshu. " +
+        "Not searchable here: youtube, douyin, twitter, reddit, linkedin — if the ask names one of those, " +
+        "say it cannot be searched rather than quietly substituting a network that can. " +
+        "It does NOT measure audience " +
         "overlap: proving the same people comment under two accounts costs roughly nine credits " +
         "per candidate, so the result says so and tells you how to check a finalist yourself. " +
         "Consumes 2 nooticr credits, or 4 with a seed creator. Use to build a list to vet; " +
@@ -1138,7 +1146,11 @@ export function registerJobTools(server: McpServer, makeClient: MakeClient, stor
         .object({
           niche: z.string().describe("Niche or keyword, e.g. 'home fitness'."),
           platform: z
-            .enum(["tiktok", "instagram", "xiaohongshu", "youtube", "douyin"])
+            // youtube 400s upstream and douyin returns user objects with every
+            // field null (nooticr-server's CREATOR_SEARCH_PLATFORMS says so next
+            // to the implementation). This tool runs the same keyword search, so
+            // advertising them here only spends a paid call to fail.
+            .enum(["tiktok", "instagram", "xiaohongshu"])
             .optional()
             .describe("Which platform (default tiktok). Lookalikes exist on tiktok and instagram only."),
           seed: z

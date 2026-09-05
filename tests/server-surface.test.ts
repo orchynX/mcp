@@ -416,3 +416,74 @@ describe("media CSP allowlist", () => {
     expect(missing, "platforms whose media the view cannot load").toEqual([]);
   });
 });
+
+/**
+ * A tool's prose and its schema have to agree about which networks it serves.
+ *
+ * They did not: search_creators advertised "TikTok, Instagram, Xiaohongshu,
+ * YouTube or Douyin" while its enum accepted only the first three, so a model
+ * that trusted the sentence and passed platform:"youtube" got a validation
+ * error. nooticr-server keeps the canonical list next to the implementation
+ * (CREATOR_SEARCH_PLATFORMS) and asserts its own enum against it — but that
+ * assertion covers the enum only, in the other repo, so the description here
+ * drifted unguarded. This is that missing half.
+ *
+ * The convention it enforces: name the networks a tool searches, and put the
+ * ones it cannot behind "Not searchable here:" so the negative claim is
+ * legible to a reader and to this test alike.
+ */
+describe("tool descriptions do not advertise platforms the schema rejects", () => {
+  const PLATFORM_WORDS = [
+    "tiktok",
+    "instagram",
+    "xiaohongshu",
+    "youtube",
+    "douyin",
+    "twitter",
+    "reddit",
+    "linkedin",
+    "weibo",
+    "bilibili",
+  ];
+
+  it("every platform a description names is either accepted or explicitly excluded", async () => {
+    const client = await connect();
+    const { tools } = await client.listTools();
+
+    const offenders: string[] = [];
+    for (const tool of tools) {
+      const enumValues = (
+        tool.inputSchema as { properties?: { platform?: { enum?: string[] } } }
+      )?.properties?.platform?.enum;
+      // Only tools that constrain a platform can contradict themselves.
+      if (!Array.isArray(enumValues)) continue;
+
+      const description = (tool.description ?? "").toLowerCase();
+      // Everything after the marker is a stated limitation, not a claim.
+      const [claimed] = description.split("not searchable here:");
+      const accepted = new Set(enumValues.map((v) => v.toLowerCase()));
+
+      for (const word of PLATFORM_WORDS) {
+        // Word-boundary match so "twitter" is not found inside a URL fragment.
+        if (!new RegExp(`\\b${word}\\b`).test(claimed)) continue;
+        if (!accepted.has(word)) {
+          offenders.push(`${tool.name}: describes ${word}, schema accepts ${[...accepted].join("/")}`);
+        }
+      }
+    }
+
+    expect(offenders).toEqual([]);
+  });
+
+  it("search_creators serves exactly what nooticr-server says it can", async () => {
+    const client = await connect();
+    const { tools } = await client.listTools();
+    const tool = tools.find((t) => t.name === "search_creators");
+    const enumValues = (
+      tool?.inputSchema as { properties?: { platform?: { enum?: string[] } } }
+    )?.properties?.platform?.enum;
+    // Mirrors CREATOR_SEARCH_PLATFORMS in nooticr-server's social_import.rs.
+    // YouTube 400s upstream; Douyin returns user objects with every field null.
+    expect(enumValues).toEqual(["tiktok", "instagram", "xiaohongshu"]);
+  });
+});

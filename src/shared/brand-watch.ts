@@ -250,7 +250,10 @@ export function registerBrandWatch(server: McpServer, makeClient: MakeClient): v
             .array(z.string())
             .optional()
             .describe(
-              "kind: \"mentions\" only — networks to sweep. Omit for every searchable network.",
+              "kind: \"mentions\" only — networks to sweep. Omit for every searchable network. "
+            + "Xiaohongshu is swept on post text only (its comments cannot be fetched upstream) and "
+            + "costs 5 a run rather than 2, so name the networks rather than omitting this if that "
+            + "trade is not worth it.",
             ),
           handle: z
             .string()

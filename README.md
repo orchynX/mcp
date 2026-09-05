@@ -90,7 +90,7 @@ them caps that fan-out with an argument.
 |------|---------|----------------|
 | `discover_social_posts` | 2 | Recent posts for a niche across nine networks, with inline thumbnails and `limit`/`offset` pagination. Use to find posts to look at. |
 | `get_user_posts` | 2 | One creator's recent posts with stats. Use to scan an account. |
-| `search_creators` | 2 | Creators by niche or keyword. Use when you know the niche but not the names. |
+| `search_creators` | 2 | People by what they make — designers, developers, photographers, anyone with an audience — found by craft, niche or keyword. Use when you know the kind of person but not their names. Searches TikTok, Instagram and Xiaohongshu; **not** YouTube, Douyin, X, Reddit or LinkedIn, which cannot be creator-searched upstream. |
 | `get_similar_creators` | 2 | Lookalikes for a creator that already works. |
 | `discover_sounds` | 2 | Trending audio with playable previews. Sound is a major ranking signal on TikTok. |
 | `discover_hashtags` | 2 | Trending hashtags with volumes and whether each is rising, cooling or steady. |

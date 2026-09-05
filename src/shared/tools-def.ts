@@ -5,12 +5,12 @@ export const TOOL_DEFINITIONS = [
  name: "analyze_post",
  title: "Analyze Post",
  description: "Frames sampled evenly across a social post (video, image, carousel/slideshow), returned as real images you can look at, together with the post's transcript, caption and stats. It hands you the material rather than a verdict: read the frames and the words, then work out the hook, the structure, the visual style, the CTA and the audience yourself, citing the frame or line behind each claim. Supports TikTok, Instagram, YouTube, X, Reddit, Douyin, Xiaohongshu, Weibo and Bilibili. Use when the visuals are the point — framing, editing, on-screen text; analyze_post_fast reads the same post without the frames for one credit less. Fans out to get_post_frames and get_post_transcript: 3 nooticr credits, 2 for the frames plus 1 for the transcript.",
- inputSchema: z.object({ url: z.string().describe("Public post URL (TikTok/Instagram/YouTube/X, Reddit, Douyin, Xiaohongshu, Weibo or Bilibili).") }).strict(),
+ inputSchema: z.object({ url: z.string().describe("Public post URL (TikTok/Instagram/YouTube/X/Reddit/Douyin/Xiaohongshu/Weibo/Bilibili/LinkedIn).") }).strict(),
  },
  {
  name: "get_social_media",
  title: "Get Social Media",
- description: "Fetch a social post's media from a TikTok, Instagram, YouTube, X, Reddit, Douyin, Xiaohongshu, Weibo or Bilibili URL: contentType (video/image/carousel/slideshow), title, caption, author, stats and direct media URLs. Returns an inline thumbnail image. (20 free credits for new users). Use when you need the post's facts and media and nothing more; if you want it interpreted, use analyze_post_fast instead. Consumes 1 nooticr credit.",
+ description: "Fetch a social post's media from a TikTok, Instagram, YouTube, X, Reddit, Douyin, Xiaohongshu, Weibo, Bilibili or LinkedIn URL: contentType (video/image/carousel/slideshow), title, caption, author, stats and direct media URLs. Returns an inline thumbnail image. (20 free credits for new users). Use when you need the post's facts and media and nothing more; if you want it interpreted, use analyze_post_fast instead. Consumes 1 nooticr credit.",
  inputSchema: z.object({ url: z.string().describe("Full public post URL.") }).strict(),
  },
  {
@@ -35,13 +35,13 @@ export const TOOL_DEFINITIONS = [
  name: "get_post_comments",
  title: "Get Post Comments",
  description: "Fetch top comments for a post URL on TikTok, Instagram, YouTube, Reddit, Douyin, X, Weibo, Bilibili or LinkedIn (plus keyword clusters from TikTok Analytics when available) — audience sentiment/audience-signal analysis. (20 free credits for new users). Use when you want to read what people actually wrote; use analyze_comments when you want it synthesised into what to do next. Consumes 2 nooticr credits.",
- inputSchema: z.object({ url: z.string().describe("Full public post URL (TikTok/Instagram/YouTube/Douyin/X/Bilibili)."), limit: z.number().int().optional().describe("Max comments (default 20).") }).strict(),
+ inputSchema: z.object({ url: z.string().describe("Full public post URL (TikTok/Instagram/YouTube/X/Reddit/Douyin/Weibo/Bilibili/LinkedIn). Not searchable here: xiaohongshu — it publishes no comment endpoint."), limit: z.number().int().optional().describe("Max comments (default 20).") }).strict(),
  },
  {
  name: "search_creators",
  title: "Search Creators",
- description: "Search creators by niche/keyword on TikTok, Instagram, Xiaohongshu, YouTube or Douyin — username, nickname, follower count, signature, verified status. Use to find influencers to vet or analyze. (20 free credits for new users). Use when you know the niche but not the names; use get_similar_creators when you already have one creator that works. Consumes 2 nooticr credits.",
- inputSchema: z.object({ keyword: z.string().describe("Niche/keyword, e.g. 'fitness' or a creator name."), platform: z.enum(["tiktok", "instagram", "xiaohongshu", "youtube", "douyin"]).optional().describe("Which platform (default tiktok)."), count: z.number().int().optional().describe("Max creators (default 8).") }).strict(),
+ description: "Find people by what they make. Search creators by craft, niche or keyword — designers, developers, photographers, illustrators, writers, founders — username, nickname, follower count, signature, verified status. Searches tiktok, instagram, xiaohongshu. Not searchable here: youtube, douyin, twitter, reddit, linkedin. (20 free credits for new users). Use when you know the kind of person but not their names; use get_similar_creators when you already have one who works. Consumes 2 nooticr credits.",
+ inputSchema: z.object({ keyword: z.string().describe("Niche/keyword, e.g. 'fitness' or a creator name."), platform: z.enum(["tiktok", "instagram", "xiaohongshu"]).optional().describe("Which platform (default tiktok)."), count: z.number().int().optional().describe("Max creators (default 8).") }).strict(),
  },
  {
  name: "get_similar_creators",
@@ -59,12 +59,12 @@ export const TOOL_DEFINITIONS = [
  name: "understand_social_post",
  title: "Understand Social Post",
  description: "The same frames and transcript analyze_post returns, asked a different question: describe what physically happens on screen, in order, with every observation anchored to a frame. Supports TikTok, Instagram, YouTube, X, Reddit, Douyin, Xiaohongshu, Weibo and Bilibili. Use when you need the events rather than the strategy; analyze_post puts the strategic question to the same material. Fans out to get_post_frames and get_post_transcript: 3 nooticr credits, 2 for the frames plus 1 for the transcript.",
- inputSchema: z.object({ url: z.string().describe("Full public post URL (TikTok/Instagram/YouTube/X/Douyin/Xiaohongshu/Bilibili)."), focus: z.string().optional().describe("Extra instruction, e.g. 'focus on the CTA'.") }).strict(),
+ inputSchema: z.object({ url: z.string().describe("Full public post URL (TikTok/Instagram/YouTube/X/Reddit/Douyin/Xiaohongshu/Weibo/Bilibili/LinkedIn)."), focus: z.string().optional().describe("Extra instruction, e.g. 'focus on the CTA'.") }).strict(),
  },
  {
  name: "get_post_transcript",
  title: "Get Post Transcript",
- description: "Get the words actually spoken in a TikTok or YouTube post by reading its caption track. Cheap and exact — use this before analyze_post when you need the script, hook wording or CTA verbatim rather than an interpretation. Returns plain text with a word count, or available:false with a reason when the post has no captions. Use before any analysis when the exact wording matters. Consumes 1 nooticr credit.",
+ description: "Get the words actually spoken in a post, on any platform nooticr reads. Where the platform publishes a caption track (TikTok, Douyin, YouTube) it is read as-is; everywhere else the audio is transcribed asynchronously — a first call returning available:false with transcribing:true and a retryAfterMs is the job accepted, not a failure, so call again with the same url. Cheap and exact — use this before analyze_post when you need the script, hook wording or CTA verbatim rather than an interpretation. Returns plain text with a word count, or available:false with a reason when the post has no captions. Use before any analysis when the exact wording matters. Consumes 1 nooticr credit.",
  inputSchema: z.object({ url: z.string().describe("Post URL (TikTok or YouTube)."), language: z.string().optional().describe("Preferred language code, e.g. 'en'.") }).strict(),
  },
  {
@@ -130,7 +130,7 @@ export const TOOL_DEFINITIONS = [
  {
  name: "search_mentions",
  title: "Search Mentions",
- description: "Brand monitoring: what people are actually saying about a term across every network at once. Searches TikTok, Instagram, YouTube, X, Reddit, Weibo, Douyin, Xiaohongshu and Bilibili in parallel, opens the posts it finds and reads their COMMENTS for the term \u2014 the mention is usually in the replies, not the caption. Returns the comments grouped under the post they were left on, each with an id you can pass to another tool, how many times it names the term, and whether the post itself is about the brand or merely where the audience raised it. Use `since` to monitor a past window and `offset` to page through. Costs 2 nooticr credits per platform searched, except Xiaohongshu at 5. Use to see what is said about a brand; discover_social_posts is for one platform's posts.",
+ description: "Brand monitoring: what people are actually saying about a term across every network at once. Searches TikTok, Instagram, YouTube, X, Reddit, Weibo, Douyin, Xiaohongshu and Bilibili in parallel, opens the posts it finds and reads their COMMENTS for the term \u2014 the mention is usually in the replies, not the caption. Returns the comments grouped under the post they were left on, each with an id you can pass to another tool, how many times it names the term, and whether the post itself is about the brand or merely where the audience raised it. Use `since` to monitor a past window and `offset` to page through. One exception to the comment read: Xiaohongshu post comments cannot be fetched upstream, so a Xiaohongshu sweep matches the post text only. Costs 2 nooticr credits per platform searched, except Xiaohongshu at 5. Use to see what is said about a brand; discover_social_posts is for one platform's posts.",
  inputSchema: z.object({ term: z.string().describe("Brand, product or person to look for, e.g. 'nooticr'."), platforms: z.array(z.enum(["youtube", "tiktok", "instagram", "douyin", "xiaohongshu", "twitter", "bilibili", "reddit", "weibo"])).optional().describe("Which networks to search (default: all). Fewer platforms costs less."), since: z.string().optional().describe("Only comments posted on or after this date, as YYYY-MM-DD. Omit for no window."), limit: z.number().int().optional().describe("Posts to open per platform (default 5, max 20). Each one is a comment fetch."), commentsPerPost: z.number().int().optional().describe("Comments to read per post (default 30, max 100)."), offset: z.number().int().optional().describe("Skip this many groups — pass nextOffset from the previous call to load more."), pageSize: z.number().int().optional().describe("Groups returned per call (default 6, max 30).") }).strict(),
  },
  {
@@ -364,8 +364,8 @@ export const TOOL_DEFINITIONS = [
  {
  name: "who_should_i_work_with",
  title: "Who Should I Work With",
- description: "A collaboration shortlist for a niche. Searches creators by keyword and, when you name a creator who already fits, merges in their lookalikes \u2014 marking which search found each one, since agreement between the two is the strongest signal in the result. It does not measure audience overlap: proving the same people comment under two accounts costs roughly nine credits per candidate, so the result says so and shows how to check a finalist instead of faking it. Use to build a list to vet. Consumes 2 nooticr credits, or 4 with a seed creator.",
- inputSchema: z.object({ niche: z.string().describe("Niche or keyword, e.g. 'home fitness'."), platform: z.enum(["tiktok", "instagram", "xiaohongshu", "youtube", "douyin"]).optional().describe("Which platform (default tiktok)."), seed: z.string().optional().describe("A creator who already fits \u2014 their lookalikes are added. Costs 2 more credits."), count: z.number().int().optional().describe("Candidates from the keyword search (default 8, max 20).") }).strict(),
+ description: "A shortlist of people to work with \u2014 collaborators, or anyone to hire or commission: designers, developers, photographers, editors. Searches creators by craft or keyword and, when you name someone who already fits, merges in their lookalikes \u2014 marking which search found each one, since agreement between the two is the strongest signal in the result. Every candidate carries the links pulled out of their bio, so vetting is reading the work. Searches tiktok, instagram, xiaohongshu. Not searchable here: youtube, douyin, twitter, reddit, linkedin. It does not measure audience overlap: proving the same people comment under two accounts costs roughly nine credits per candidate, so the result says so and shows how to check a finalist instead of faking it. Use to build a list to vet. Consumes 2 nooticr credits, or 4 with a seed creator.",
+ inputSchema: z.object({ niche: z.string().describe("Niche or keyword, e.g. 'home fitness'."), platform: z.enum(["tiktok", "instagram", "xiaohongshu"]).optional().describe("Which platform (default tiktok)."), seed: z.string().optional().describe("A creator who already fits \u2014 their lookalikes are added. Costs 2 more credits."), count: z.number().int().optional().describe("Candidates from the keyword search (default 8, max 20).") }).strict(),
  },
  {
  name: "why_did_this_underperform",
